@@ -102,3 +102,6 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
     </div>
   );
 };
+
+export default WishlistDrawer;
+

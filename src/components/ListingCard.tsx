@@ -250,3 +250,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     </article>
   );
 };
+
+export default ListingCard;
+

@@ -80,3 +80,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
     </div>
   );
 };
+
+export default ReferralModal;
+

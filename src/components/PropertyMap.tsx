@@ -162,3 +162,6 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
     </div>
   );
 };
+
+export default PropertyMap;
+

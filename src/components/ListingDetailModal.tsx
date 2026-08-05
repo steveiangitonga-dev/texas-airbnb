@@ -828,3 +828,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
     </div>
   );
 };
+
+export default ListingDetailModal;
+

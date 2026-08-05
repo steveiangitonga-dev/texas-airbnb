@@ -112,3 +112,6 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({ listing, onC
     </div>
   );
 };
+
+export default SocialShareModal;
+

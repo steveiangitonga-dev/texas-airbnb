@@ -366,3 +366,6 @@ export const BookingPaymentModal: React.FC<BookingPaymentModalProps> = ({
     </div>
   );
 };
+
+export default BookingPaymentModal;
+

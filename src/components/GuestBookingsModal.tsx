@@ -183,3 +183,6 @@ export const GuestBookingsModal: React.FC<GuestBookingsModalProps> = ({
     </div>
   );
 };
+
+export default GuestBookingsModal;
+

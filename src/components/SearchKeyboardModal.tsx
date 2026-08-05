@@ -342,3 +342,6 @@ export const SearchKeyboardModal: React.FC<SearchKeyboardModalProps> = ({
     </div>
   );
 };
+
+export default SearchKeyboardModal;
+

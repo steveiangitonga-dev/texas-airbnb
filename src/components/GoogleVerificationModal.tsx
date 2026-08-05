@@ -175,3 +175,6 @@ export const GoogleVerificationModal: React.FC<GoogleVerificationModalProps> = (
     </div>
   );
 };
+
+export default GoogleVerificationModal;
+

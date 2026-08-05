@@ -292,3 +292,6 @@ export const CustomSearchFiltersModal: React.FC<CustomSearchFiltersModalProps> =
     </div>
   );
 };
+
+export default CustomSearchFiltersModal;
+
