@@ -1,0 +1,6 @@
+{
+  "name": "Texas Airbnbs",
+  "description": "Full-stack vacation rental booking platform for Texas stays with host-approval workflow, M-Pesa & East African bank payments, admin portal, and Swahili/English support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
