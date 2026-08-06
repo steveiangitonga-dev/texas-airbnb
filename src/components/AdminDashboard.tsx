@@ -36,7 +36,11 @@ import {
   Calendar,
   Filter,
   Key,
-  Loader2
+  Loader2,
+  Download,
+  Code,
+  FileCode,
+  Package
 } from 'lucide-react';
 import {
   Listing,
@@ -908,6 +912,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
     setSettingsSavedMessage(true);
     setTimeout(() => setSettingsSavedMessage(false), 3000);
+  };
+
+  // Source Code Export & Download States
+  const [isExportingCode, setIsExportingCode] = useState(false);
+  const [exportedCodeData, setExportedCodeData] = useState<{ totalFiles: number; files: Array<{ path: string; content: string }> } | null>(null);
+  const [showCodeViewerModal, setShowCodeViewerModal] = useState(false);
+  const [selectedViewFile, setSelectedViewFile] = useState<string>('');
+  const [copiedCodeNotice, setCopiedCodeNotice] = useState(false);
+
+  const handleDownloadZip = () => {
+    window.open('/api/admin/download-source-zip', '_blank');
+  };
+
+  const handleDownloadTxt = () => {
+    window.open('/api/admin/download-source-txt', '_blank');
+  };
+
+  const handleFetchCodeViewer = async () => {
+    setIsExportingCode(true);
+    try {
+      const res = await fetch('/api/admin/export-source-json');
+      const data = await res.json();
+      if (data.success) {
+        setExportedCodeData(data);
+        if (data.files && data.files.length > 0) {
+          setSelectedViewFile(data.files[0].path);
+        }
+        setShowCodeViewerModal(true);
+      }
+    } catch (err) {
+      console.error('Failed to fetch source code json:', err);
+    } finally {
+      setIsExportingCode(false);
+    }
+  };
+
+  const handleCopyCodeToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCodeNotice(true);
+    setTimeout(() => setCopiedCodeNotice(false), 2500);
   };
 
   // 1. FIRST LAYER OF SECURITY: Secret Access Password Gate (Pre-Admin Login)
@@ -2799,14 +2843,188 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-2xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs flex items-center space-x-2 shadow-md cursor-pointer"
-              >
-                <Save className="w-4 h-4" />
-                <span>Save Platform Settings</span>
-              </button>
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="submit"
+                  className="px-6 py-3 rounded-2xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs flex items-center space-x-2 shadow-md cursor-pointer transition-transform active:scale-95"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Platform Settings</span>
+                </button>
+              </div>
+
+              {/* FULL WEBSITE SOURCE CODE EXPORT & DOWNLOAD SECTION */}
+              <div className="p-5 rounded-2xl bg-amber-500/10 dark:bg-stone-800/90 border-2 border-amber-500/40 dark:border-amber-700/60 space-y-4 text-stone-900 dark:text-stone-100 shadow-sm mt-8">
+                <div className="flex items-center space-x-2.5">
+                  <div className="p-2 rounded-xl bg-amber-500 text-stone-950 font-bold">
+                    <Code className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif font-bold text-base text-amber-900 dark:text-amber-300">
+                      Full Website Source Code Backup & Download
+                    </h4>
+                    <p className="text-[11px] text-stone-600 dark:text-stone-300 font-medium">
+                      Download the complete source code of this entire website — every file, component, API endpoint, database configuration, and styling module.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadZip}
+                    className="p-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow cursor-pointer transition-all active:scale-95"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span>Download Source (.ZIP)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadTxt}
+                    className="p-3 rounded-xl bg-stone-900 hover:bg-stone-950 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow cursor-pointer transition-all active:scale-95"
+                  >
+                    <FileCode className="w-4 h-4" />
+                    <span>Download Single File (.TXT)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleFetchCodeViewer}
+                    disabled={isExportingCode}
+                    className="p-3 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-amber-950 dark:text-amber-300 font-bold text-xs flex items-center justify-center space-x-2 border border-amber-300 dark:border-stone-700 cursor-pointer transition-all active:scale-95"
+                  >
+                    {isExportingCode ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-amber-700" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                    )}
+                    <span>{isExportingCode ? 'Loading Source...' : 'Inspect / Copy Source Files'}</span>
+                  </button>
+                </div>
+              </div>
             </form>
+          )}
+
+          {/* CODE INSPECTOR / SOURCE CODE VIEWER MODAL */}
+          {showCodeViewerModal && exportedCodeData && (
+            <div className="fixed inset-0 z-50 overflow-hidden bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+              <div className="bg-stone-900 text-stone-100 rounded-3xl max-w-6xl w-full h-[90vh] shadow-2xl border border-stone-800 flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className="p-4 sm:p-5 border-b border-stone-800 flex items-center justify-between bg-stone-950">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      <Code className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif font-bold text-base sm:text-lg">Full Website Source Code Explorer</h3>
+                      <p className="text-xs text-stone-400">
+                        {exportedCodeData.totalFiles} code files loaded • Complete project source code
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleDownloadZip}
+                      className="px-3 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs flex items-center space-x-1.5 transition-all"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">ZIP</span>
+                    </button>
+                    <button
+                      onClick={handleDownloadTxt}
+                      className="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs flex items-center space-x-1.5 transition-all"
+                    >
+                      <FileCode className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">TXT</span>
+                    </button>
+                    <button
+                      onClick={() => setShowCodeViewerModal(false)}
+                      className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
+                  {/* Left File List */}
+                  <div className="w-full sm:w-72 bg-stone-950/80 border-r border-stone-800 flex flex-col overflow-y-auto max-h-48 sm:max-h-full">
+                    <div className="p-3 text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-stone-800/60 sticky top-0 bg-stone-950">
+                      Project Files ({exportedCodeData.files.length})
+                    </div>
+                    <div className="divide-y divide-stone-800/40 text-xs">
+                      {exportedCodeData.files.map((f) => (
+                        <button
+                          key={f.path}
+                          onClick={() => setSelectedViewFile(f.path)}
+                          className={`w-full text-left p-2.5 font-mono truncate transition-colors flex items-center space-x-2 ${
+                            selectedViewFile === f.path
+                              ? 'bg-amber-500/20 text-amber-300 font-bold border-l-4 border-amber-500'
+                              : 'text-stone-300 hover:bg-stone-800/60'
+                          }`}
+                        >
+                          <FileCode className="w-3.5 h-3.5 flex-shrink-0 text-stone-400" />
+                          <span className="truncate">{f.path}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right Code Content Viewer */}
+                  <div className="flex-1 flex flex-col bg-stone-900 overflow-hidden">
+                    {selectedViewFile ? (
+                      <>
+                        <div className="p-3 bg-stone-950 border-b border-stone-800 flex items-center justify-between text-xs font-mono">
+                          <span className="text-amber-400 font-bold flex items-center space-x-1.5">
+                            <Code className="w-3.5 h-3.5" />
+                            <span>{selectedViewFile}</span>
+                          </span>
+                          <button
+                            onClick={() => {
+                              const fileObj = exportedCodeData.files.find((f) => f.path === selectedViewFile);
+                              if (fileObj) handleCopyCodeToClipboard(fileObj.content);
+                            }}
+                            className="px-3 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold flex items-center space-x-1 transition-all"
+                          >
+                            {copiedCodeNotice ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{copiedCodeNotice ? 'Copied!' : 'Copy Code'}</span>
+                          </button>
+                        </div>
+                        <div className="flex-1 p-4 overflow-auto font-mono text-xs leading-relaxed text-stone-200 selection:bg-amber-500 selection:text-stone-950 whitespace-pre">
+                          {exportedCodeData.files.find((f) => f.path === selectedViewFile)?.content || '// Empty file'}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-stone-500 text-xs">
+                        Select a file from the sidebar to view code.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="p-3 bg-stone-950 border-t border-stone-800 flex items-center justify-between text-xs">
+                  <span className="text-stone-400">
+                    Texas Airbnbs • Complete Source Code Export Package
+                  </span>
+                  <button
+                    onClick={() => {
+                      const allText = exportedCodeData.files
+                        .map((f) => `=== FILE: ${f.path} ===\n\n${f.content}\n\n`)
+                        .join('\n');
+                      handleCopyCodeToClipboard(allText);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold flex items-center space-x-1.5 shadow"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy All Website Code to Clipboard</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* TAB: Notifications */}

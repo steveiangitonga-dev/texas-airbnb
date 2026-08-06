@@ -5,6 +5,7 @@ import multer from 'multer';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import compression from 'compression';
+import JSZip from 'jszip';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { readDb, writeDb } from './src/server/db.js';
@@ -1136,6 +1137,103 @@ app.put('/api/admin/settings', (req, res) => {
   writeDb(db);
   createAuditLog('UPDATE_SETTINGS', `Updated platform settings & CMS Website Content`);
   res.json(db.settings);
+});
+
+// Helper function to recursively collect source files
+function getAllSourceFiles(dir: string, baseDir: string = dir): Array<{ relativePath: string; fullPath: string; content: string }> {
+  const files: Array<{ relativePath: string; fullPath: string; content: string }> = [];
+  if (!fs.existsSync(dir)) return files;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+
+    if (
+      entry.isDirectory() &&
+      !['node_modules', 'dist', '.git', '.cache', '.vite', '.output'].includes(entry.name)
+    ) {
+      files.push(...getAllSourceFiles(fullPath, baseDir));
+    } else if (entry.isFile()) {
+      const ext = path.extname(entry.name).toLowerCase();
+      const codeExtensions = ['.ts', '.tsx', '.js', '.jsx', '.json', '.css', '.html', '.md', '.svg', '.example', '.txt', '.config', '.mjs', '.cjs'];
+      if (codeExtensions.includes(ext) || entry.name.startsWith('.')) {
+        try {
+          const content = fs.readFileSync(fullPath, 'utf-8');
+          files.push({ relativePath, fullPath, content });
+        } catch (e) {
+          console.error(`Error reading file ${relativePath}:`, e);
+        }
+      }
+    }
+  }
+
+  return files;
+}
+
+// GET /api/admin/export-source-json (Return JSON array of files and contents)
+app.get('/api/admin/export-source-json', (req, res) => {
+  try {
+    const rootDir = process.cwd();
+    const files = getAllSourceFiles(rootDir);
+    res.json({
+      success: true,
+      totalFiles: files.length,
+      files: files.map(f => ({ path: f.relativePath, content: f.content }))
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to read source files', details: err.message });
+  }
+});
+
+// GET /api/admin/download-source-zip (Download as ZIP archive)
+app.get('/api/admin/download-source-zip', async (req, res) => {
+  try {
+    const rootDir = process.cwd();
+    const files = getAllSourceFiles(rootDir);
+    const zip = new JSZip();
+
+    for (const file of files) {
+      zip.file(file.relativePath, file.content);
+    }
+
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="texasairbnbs-complete-website-source.zip"');
+    res.send(zipBuffer);
+  } catch (err: any) {
+    console.error('ZIP generation error:', err);
+    res.status(500).json({ error: 'Failed to generate source zip', details: err.message });
+  }
+});
+
+// GET /api/admin/download-source-txt (Download as single concatenated text file)
+app.get('/api/admin/download-source-txt', (req, res) => {
+  try {
+    const rootDir = process.cwd();
+    const files = getAllSourceFiles(rootDir);
+
+    let combinedText = `================================================================================\n`;
+    combinedText += `TEXAS AIRBNBS - COMPLETE WEBSITE SOURCE CODE EXPORT\n`;
+    combinedText += `Export Timestamp: ${new Date().toISOString()}\n`;
+    combinedText += `Total Source Code Files: ${files.length}\n`;
+    combinedText += `================================================================================\n\n`;
+
+    for (const file of files) {
+      combinedText += `/*******************************************************************************\n`;
+      combinedText += ` * FILE: ${file.relativePath}\n`;
+      combinedText += ` *****************************************************************--------------/\n\n`;
+      combinedText += file.content;
+      combinedText += `\n\n\n`;
+    }
+
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="texasairbnbs-complete-website-code.txt"');
+    res.send(combinedText);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to export source text', details: err.message });
+  }
 });
 
 // GET /api/notifications
