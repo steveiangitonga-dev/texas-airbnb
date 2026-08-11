@@ -1245,7 +1245,7 @@ app.get('/api/notifications', (req, res) => {
 // SEO: GET /sitemap.xml
 app.get('/sitemap.xml', (req, res) => {
   const db = readDb();
-  const baseUrl = process.env.APP_URL || 'https://texasairbnbs.com';
+  const baseUrl = 'https://thikabnbs.com';
   const today = new Date().toISOString().split('T')[0];
 
   const urls = [
