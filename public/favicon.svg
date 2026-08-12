@@ -1,45 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="dark-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1c1917" />
-      <stop offset="50%" stop-color="#17120e" />
-      <stop offset="100%" stop-color="#090706" />
-    </linearGradient>
-    <linearGradient id="luxury-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fef3c7" />
-      <stop offset="30%" stop-color="#f59e0b" />
-      <stop offset="70%" stop-color="#d97706" />
-      <stop offset="100%" stop-color="#92400e" />
-    </linearGradient>
-    <linearGradient id="gold-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fde68a" />
-      <stop offset="100%" stop-color="#b45309" />
-    </linearGradient>
-    <filter id="gold-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-  </defs>
-
-  <!-- Premium Rounded Dark Obsidian Canvas -->
-  <rect width="512" height="512" rx="128" fill="url(#dark-bg)" />
-  <rect x="12" y="12" width="488" height="488" rx="116" fill="none" stroke="url(#gold-stroke)" stroke-width="6" stroke-opacity="0.4" />
-
-  <!-- Subtle Radial Inner Accent Ring -->
-  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#luxury-gold)" stroke-width="2" stroke-dasharray="8 8" opacity="0.25" />
-
-  <!-- Lone Star at Top Roof Peak -->
-  <polygon points="256,105 264,124 285,124 268,137 274,156 256,144 238,156 244,137 227,124 248,124" fill="url(#luxury-gold)" filter="url(#gold-glow)" />
-
-  <!-- Luxury Architectural Roof & Monogram -->
-  <path d="M 120 235 L 256 125 L 392 235 L 362 235 L 256 150 L 150 235 Z" fill="url(#luxury-gold)" />
-  
-  <!-- Sleek Pillar / Monogram 'T' & Villa Front -->
-  <path d="M 160 250 H 352 V 290 H 284 V 400 H 228 V 290 H 160 Z" fill="url(#luxury-gold)" />
-
-  <!-- House Door Cutout / Keyhole Accent -->
-  <path d="M 240 340 A 16 16 0 0 1 272 340 V 400 H 240 Z" fill="#1c1917" />
-
-  <!-- Gold Pedestal Base Ribbon -->
-  <rect x="160" y="420" width="192" height="14" rx="7" fill="url(#luxury-gold)" />
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Texas Airbnbs">
+  <rect width="64" height="64" rx="12" fill="#1c1917"/>
+  <text x="50%" y="50%" fill="#f8f7f5" font-family="sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">T</text>
 </svg>
