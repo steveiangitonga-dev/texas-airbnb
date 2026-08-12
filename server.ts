@@ -21,7 +21,7 @@ import {
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 8080;
 
 // Enable gzip/brotli HTTP response compression for fast delivery
 app.use(compression());
