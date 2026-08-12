@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Texas Airbnbs favicon">
+  <rect width="100%" height="100%" rx="60" fill="#1c1917" />
+  <g transform="translate(0,0)">
+    <circle cx="256" cy="220" r="120" fill="#f59e0b" />
+    <text x="256" y="260" font-family="Helvetica, Arial, sans-serif" font-size="200" fill="#1c1917" text-anchor="middle" dominant-baseline="middle" font-weight="700">T</text>
+  </g>
+</svg>
